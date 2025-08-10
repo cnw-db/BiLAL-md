@@ -1,41 +1,164 @@
-<h1 align="center">💠 BILAL-MD - WhatsApp Bot</h1>
-<p align="center">
-   A powerful multi-functional WhatsApp bot built with <b>Baileys MD</b> library.
-   <br>
-   Developed by <b>BILAL</b> for advanced WhatsApp automation, media tools, AI integration, and more!
-</p>
+# BiLAL-MD
+
+![BiLAL-MD](https://files.catbox.moe/kunzpz.png)
+
+[![Fork on GitHub](https://img.shields.io/badge/Fork%20on-GitHub-orange?logo=github)](https://github.com/cnw-db/BiLAL-md/fork)
 
 ---
 
-### 📌 Features
+## GitHub Actions - Node.js CI
 
-- ✅ WhatsApp automation
-- 📥 YouTube, TikTok, Instagram downloader
-- 🎵 Music / Video search & download
-- 🧠 ChatGPT & Gemini AI Support
-- 🌐 URL shortener, link preview, text tools
-- 🔞 18+ Filters (Optional toggle)
-- ⚙️ Group Management & Moderation
-- 💬 Auto-reply & chatbot features
-- 🎭 Anime, logos, quotes, and more!
+This repository uses GitHub Actions to automatically test and build the project on every push or pull request to the `main` branch.
+
+### Workflow file location
+
+`.github/workflows/nodejs-ci.yml`
+
+### Workflow code:
+
+```yaml
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start application
+      run: npm start
+
 
 ---
 
-### 🚀 Deploy Your Own
+🔗 Links
 
-You can deploy BILAL-MD on these platforms:
+Repository: https://github.com/cnw-db/BiLAL-md.git
 
-#### 🔸 Render (Recommended)
+Pair Site: https://pair-vd1s.onrender.com
 
-1. Fork this repo.
-2. Go to [Render](https://render.com) and connect your GitHub repo.
-3. Set the environment variables (`SESSION_ID`, `OWNER_NUMBER`, etc.)
-4. Deploy and enjoy 🎉
+Support Channel: Follow the KING BILAL -MD Heroku CC channel on WhatsApp:
+https://whatsapp.com/channel/0029Vaj3Xnu17EmtDxTNnQ0G
 
-#### 🔹 Local Setup
 
-```bash
-git clone https://github.com/YourUsername/BILAL-MD.git
-cd BILAL-MD
+
+---
+
+🚀 Deploy on Heroku
+
+You can quickly deploy BiLAL-MD using the Heroku template:
+
+
+
+Steps to deploy
+
+1. Click the Deploy to Heroku button above.
+
+
+2. Log in to your Heroku account.
+
+
+3. Set necessary environment variables such as:
+
+SESSION_ID (your WhatsApp session)
+
+OWNER_NUMBER (your WhatsApp number with country code)
+
+
+
+4. Deploy the app.
+
+
+5. Visit the Pair Site (https://pair-vd1s.onrender.com) to link your WhatsApp number.
+
+
+6. Enjoy your bot!
+
+
+
+
+---
+
+📋 Features
+
+Fast and reliable WhatsApp bot built with Baileys.
+
+Supports multiple commands (media, groups, fun, admin, and more).
+
+Pair your WhatsApp number easily through the Pair Site UI.
+
+Supports custom plugins and configurations.
+
+
+
+---
+
+⚙️ Requirements
+
+Node.js v16+ (tested with 20.x)
+
+WhatsApp phone number for pairing.
+
+Heroku account (optional, for cloud deployment).
+
+Internet connection.
+
+
+
+---
+
+🛠️ Local Installation
+
+If you want to run locally, do the following:
+
+git clone https://github.com/cnw-db/BiLAL-md.git
+cd BiLAL-md
 npm install
-node index.js
+npm start
+
+Then visit the Pair Site to link your WhatsApp number.
+
+
+---
+
+🤝 Support
+
+Join the official support WhatsApp channel for help, updates, and community:
+
+https://whatsapp.com/channel/0029Vaj3Xnu17EmtDxTNnQ0G
+
+
+---
+
+📝 License
+
+This project is licensed under the MIT License.
+
+
+---
+
+Made with ❤️ by the BiLAL-MD Team
+
