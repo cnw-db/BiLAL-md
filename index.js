@@ -95,20 +95,38 @@ const port = process.env.PORT || 9090;
           version
           })
       
-  conn.ev.on('connection.update', (update) => {
-  const { connection, lastDisconnect } = update
-  if (connection === 'close') {
-  if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
-  connectToWA()
-  }
-  } else if (connection === 'open') {
-  console.log('🧬 Installing Plugins')
-  const path = require('path');
-  fs.readdirSync("./plugins/").forEach((plugin) => {
-  if (path.extname(plugin).toLowerCase() == ".js") {
-  require("./plugins/" + plugin);
-  }
-  });
+  const { DisconnectReason } = require("@whiskeysockets/baileys");
+const fs = require("fs");
+const path = require("path");
+
+conn.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect } = update;
+
+    if (connection === 'close') {
+        const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.statusCode;
+        console.log("Connection closed. Reason code:", code);
+
+        if (code !== DisconnectReason.loggedOut) {
+            console.log("♻️ Reconnecting...");
+            connectToWA();
+        } else {
+            console.log("❌ Logged out. Please scan QR again.");
+        }
+
+    } else if (connection === 'open') {
+        console.log('🧬 Installing Plugins...');
+        fs.readdirSync("./plugins/").forEach((plugin) => {
+            if (path.extname(plugin).toLowerCase() === ".js") {
+                try {
+                    require("./plugins/" + plugin);
+                    console.log(`✅ Loaded plugin: ${plugin}`);
+                } catch (err) {
+                    console.error(`❌ Failed to load plugin ${plugin}:`, err);
+                }
+            }
+        });
+    }
+});
   console.log('Plugins installed successful ✅')
   console.log('Bot connected to whatsapp ✅')
   
