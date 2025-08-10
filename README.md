@@ -23,6 +23,32 @@ Easily pair your WhatsApp number and automate fun, admin, media commands and mor
 - ✅ Customizable plugins & configs  
 
 ---
+--
+
+🔗 Useful Links
+
+Repo: https://github.com/cnw-db/BiLAL-md
+
+Pair Site: https://pair-vd1s.onrender.com
+
+Support Channel (WhatsApp): Join Here
+
+
+
+---
+
+📜 License
+
+MIT License © BiLAL-MD Team
+
+
+---
+
+Made with ❤️ by the BiLAL-MD Team
+
+
+---
+
 
 ## 🛠️ Installation
 
@@ -68,3 +94,5 @@ jobs:
 
     - name: Start application
       run: npm start
+
+
