@@ -29,7 +29,7 @@ PREFIX: process.env.PREFIX || ".",
 // add your prifix for bot   
 BOT_NAME: process.env.BOT_NAME || "BILAL-MD",
 // add bot namw here for menu
-STICKER_NAME: process.env.STICKER_NAME || "WHITESHADOW-MD",
+STICKER_NAME: process.env.STICKER_NAME || "BILAL-MD",
 // type sticker pack name 
 CUSTOM_REACT: process.env.CUSTOM_REACT || "false",
 // make this true for custum emoji react    
@@ -41,7 +41,7 @@ OWNER_NUMBER: process.env.OWNER_NUMBER || "923078071982",
 // add your bot owner number
 OWNER_NAME: process.env.OWNER_NAME || "BILAL KING",
 // add bot owner name
-DESCRIPTION: process.env.DESCRIPTION || "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ WHITESHADOW-MD*",
+DESCRIPTION: process.env.DESCRIPTION || "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ BILAL-MD*",
 // add bot owner name    
 ALIVE_IMG: process.env.ALIVE_IMG || "https://files.catbox.moe/kunzpz.png",
 // add img for alive msg
