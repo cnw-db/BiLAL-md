@@ -3,25 +3,6 @@ const os = require("os");
 const { runtime } = require('../lib/functions');
 const config = require('../config');
 
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "©BILAL KING",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
-END:VCARD`
-        }
-    }
-};
-
 cmd({
     pattern: "alive",
     alias: ["status", "online", "a"],
@@ -57,9 +38,29 @@ async (conn, mek, m, { from, sender, reply }) => {
                     newsletterJid: '120363296818107681@newsletter',
                     newsletterName: '👾BILAL ᎷᎠ👾',
                     serverMessageId: 143
+                },
+                externalAdReply: {
+                    title: "Meta AI",
+                    body: "Artificial Intelligence Assistant",
+                    thumbnailUrl: "https://i.ibb.co/0jzR6wQ/meta-ai.jpg", // Meta AI logo or image
+                    sourceUrl: "https://www.meta.ai", // Optional link
+                    mediaType: 1,
+                    renderLargerThumbnail: true
                 }
             }
-        }, { quoted: fakevCard });
+        }, { quoted: {
+            key: {
+                fromMe: false,
+                participant: '0@s.whatsapp.net',
+                ...(from ? { remoteJid: from } : {})
+            },
+            message: {
+                contactMessage: {
+                    displayName: "Meta AI",
+                    vcard: `BEGIN:VCARD\nVERSION:3.0\nFN:Meta AI\nORG:Meta Platforms, Inc.\nTEL;type=CELL;type=VOICE;waid=0:+0\nEND:VCARD`
+                }
+            }
+        }});
 
     } catch (e) {
         console.error("Alive Error:", e);
