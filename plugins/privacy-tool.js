@@ -296,7 +296,7 @@ async (conn, mek, m, { from, l, quoted, body, isCmd, command, args, q, isGroup, 
         l(e);
     }
 });
-const { cmd } = require("../command");
+
 
 cmd({
   pattern: "getpp",
