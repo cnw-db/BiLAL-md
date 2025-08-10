@@ -1,14 +1,14 @@
 # BiLAL-MD
 
-![BiLAL-MD](https://files.catbox.moe/kunzpz.png)
+![BiLAL-MD Banner](https://files.catbox.moe/kunzpz.png)
 
 [![Fork on GitHub](https://img.shields.io/badge/Fork%20on-GitHub-orange?logo=github)](https://github.com/cnw-db/BiLAL-md/fork)
 
 ---
 
-## GitHub Actions - Node.js CI
+## 🚀 GitHub Actions - Node.js CI
 
-This repository uses GitHub Actions to automatically test and build the project on every push or pull request to the `main` branch.
+This project uses GitHub Actions to automatically test and build the project on every push or pull request to the `main` branch.
 
 ### Workflow file location
 
@@ -16,7 +16,6 @@ This repository uses GitHub Actions to automatically test and build the project 
 
 ### Workflow code (copy-paste ready):
 
-\```yaml
 name: Node.js CI
 
 on:
@@ -50,59 +49,55 @@ jobs:
 
     - name: Start application
       run: npm start
-\```
 
 ---
 
-## 🔗 Links
+## 🔗 Useful Links
 
 - **Repository:** [https://github.com/cnw-db/BiLAL-md.git](https://github.com/cnw-db/BiLAL-md.git)  
 - **Pair Site:** [https://pair-vd1s.onrender.com](https://pair-vd1s.onrender.com)  
-- **Support Channel:** Follow the KING BILAL -MD Heroku CC channel on WhatsApp:  
-  [https://whatsapp.com/channel/0029Vaj3Xnu17EmtDxTNnQ0G](https://whatsapp.com/channel/0029Vaj3Xnu17EmtDxTNnQ0G)
+- **Support Channel:** [KING BILAL -MD Heroku CC WhatsApp Channel](https://whatsapp.com/channel/0029Vaj3Xnu17EmtDxTNnQ0G)
 
 ---
 
-## 🚀 Deploy on Heroku
+## 🚀 Deploy BiLAL-MD on Heroku
 
-You can quickly deploy BiLAL-MD using the Heroku template:
+Use the button below for instant deployment:
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/cnw-db/BiLAL-md.git)
 
-### Steps to deploy
+### Deployment Steps
 
-1. Click the **Deploy to Heroku** button above.
-2. Log in to your Heroku account.
-3. Set necessary environment variables such as:
-   - `SESSION_ID` (your WhatsApp session)
-   - `OWNER_NUMBER` (your WhatsApp number with country code)
-4. Deploy the app.
-5. Visit the Pair Site ([https://pair-vd1s.onrender.com](https://pair-vd1s.onrender.com)) to link your WhatsApp number.
-6. Enjoy your bot!
+1. Click **Deploy to Heroku** above.  
+2. Login to your Heroku account.  
+3. Fill environment variables (such as `SESSION_ID` and `OWNER_NUMBER`).  
+4. Deploy the app.  
+5. Visit the Pair Site: [https://pair-vd1s.onrender.com](https://pair-vd1s.onrender.com) and link your WhatsApp number.  
+6. Start using your bot instantly!
 
 ---
 
 ## 📋 Features
 
-- Fast and reliable WhatsApp bot built with Baileys.
-- Supports multiple commands (media, groups, fun, admin, and more).
-- Pair your WhatsApp number easily through the Pair Site UI.
-- Supports custom plugins and configurations.
+- Reliable WhatsApp Bot using Baileys library  
+- Supports commands for media, groups, admins, fun, and more  
+- Easy pairing via web UI  
+- Extensible with plugins and configurations
 
 ---
 
 ## ⚙️ Requirements
 
-- Node.js v16+ (tested with 20.x)
-- WhatsApp phone number for pairing.
-- Heroku account (optional, for cloud deployment).
-- Internet connection.
+- Node.js v16 or higher (tested on 20.x)  
+- WhatsApp number for pairing  
+- Heroku account (optional for cloud deployment)  
+- Internet connection
 
 ---
 
-## 🛠️ Local Installation
+## 🛠️ Running Locally
 
-If you want to run locally, do the following:
+Clone and run:
 
 ```bash
 git clone https://github.com/cnw-db/BiLAL-md.git
