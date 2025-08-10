@@ -125,8 +125,7 @@ conn.ev.on('connection.update', (update) => {
                 }
             }
         });
-    }
-});
+    
   console.log('Plugins installed successful ✅')
   console.log('Bot connected to whatsapp ✅')
   
