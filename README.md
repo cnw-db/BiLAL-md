@@ -32,15 +32,9 @@ Click the button below to deploy instantly:
 
 [![Deploy on Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/cnw-db/BiLAL-md.git)
 
-### Run Locally
+### Run Workflow 
 
 ```bash
-git clone https://github.com/cnw-db/BiLAL-md.git
-cd BiLAL-md
-npm install
-npm start
-
-### Github workflow code
 name: Node.js CI
 
 on:
