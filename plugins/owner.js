@@ -53,7 +53,7 @@ async (conn, mek, m, { from }) => {
 
         // Send audio as per your request
         await conn.sendMessage(from, {
-            audio: { url: 'https://files.catbox.moe/kfsn0s.mp3' }, // Audio URL
+            audio: { url: 'https://files.catbox.moe/kfdydi.mp3' }, // Audio URL
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
