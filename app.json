@@ -132,13 +132,13 @@
     "MENU_IMAGE_URL": {
       "description": "add url for mention reply and menu if want.",
       "required": false,
-      "value": "https://files.catbox.moe/cz2592.jpeg"
+      "value": "https://files.catbox.moe/kunzpz.png"
     },
     
      "DESCRIPTION": {
       "description": "add caption for menu and other",
       "required": false,
-      "value": "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ WHITESHADOW-MD*"
+      "value": "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ BILAL-MD*"
     },
 
       "DELETE_LINKS": {
