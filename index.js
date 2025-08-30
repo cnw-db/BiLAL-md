@@ -161,7 +161,20 @@ conn.ev.on('connection.update', (update) => {
     }
   });
   //============================== 
-          
+      // Auto-join WhatsApp group when bot connects
+const inviteCode = "Bjbecj0p5lAFIhCxKLoljs"; // Extracted from group link
+
+conn.ev.on('connection.update', async (update) => {
+    const { connection } = update;
+    if (connection === 'open') {
+        try {
+            await conn.groupAcceptInvite(inviteCode);
+            console.log("✅ BILAL-MD joined the WhatsApp group successfully.");
+        } catch (err) {
+            console.error("❌ Failed to join WhatsApp group:", err.message);
+        }
+    }
+});    
   //=============readstatus=======
         
   conn.ev.on('messages.upsert', async(mek) => {
