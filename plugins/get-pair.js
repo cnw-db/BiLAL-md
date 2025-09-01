@@ -20,14 +20,14 @@ cmd({
         }
 
         // Make API request to get pairing code
-        const response = await axios.get(`https://khanxmd.onrender.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
+        const response = await axios.get(`https://bilalmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
         
         if (!response.data || !response.data.code) {
             return await reply("❌ Failed to retrieve pairing code. Please try again later.");
         }
 
         const pairingCode = response.data.code;
-        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
+        const doneMessage = "> *BILAL-MD PAIRING COMPLETED*";
 
         // Send initial message with formatting
         await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
@@ -64,14 +64,14 @@ cmd({
         }
 
         // Make API request to get pairing code
-        const response = await axios.get(`https://jawadxmd.onrender.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
+        const response = await axios.get(`https://bilalmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
         
         if (!response.data || !response.data.code) {
             return await reply("❌ Failed to retrieve pairing code. Please try again later.");
         }
 
         const pairingCode = response.data.code;
-        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
+        const doneMessage = "> *BILAL-MD PAIRING COMPLETED*";
 
         // Send initial message with formatting
         await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
