@@ -1,89 +1,90 @@
-const { cmd, commands } = require('../command');
+const { cmd } = require('../command');
 const axios = require('axios');
 
+// ===============================
+// Pair 1 (BILAL-MD)
+// ===============================
 cmd({
     pattern: "pair",
     alias: ["getpair", "clonebot"],
     react: "✅",
-    desc: "Get pairing code for BILAL MD bot",
-    category: "download",
-    use: ".pair +94704896XXX",
-    filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        // Extract phone number from command
-        const phoneNumber = q ? q.trim() : senderNumber;
-        
-        // Validate phone number format
-        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
-            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +947XXXXXXX");
-        }
-
-        // Make API request to get pairing code
-        const response = await axios.get(`https://bilalmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
-        
-        if (!response.data || !response.data.code) {
-            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
-        }
-
-        const pairingCode = response.data.code;
-        const doneMessage = "> *BILAL-MD PAIRING COMPLETED*";
-
-        // Send initial message with formatting
-        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
-
-        // Add 2 second delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Send clean code message
-        await reply(`${pairingCode}`);
-
-    } catch (error) {
-        console.error("Pair command error:", error);
-        await reply("❌ An error occurred while getting pairing code. Please try again later.");
-    }
-});
-
-
-cmd({
-    pattern: "pair2",
-    alias: ["getpair2", "clonebot2"],
-    react: "✅",
-    desc: "Get pairing code for WHITESHADOW-MD bot",
+    desc: "Get pairing code for BILAL-MD bot",
     category: "download",
     use: ".pair +947XXXXXXXX",
     filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+}, async (conn, mek, m, { q, senderNumber, reply }) => {
     try {
-        // Extract phone number from command
         const phoneNumber = q ? q.trim() : senderNumber;
-        
-        // Validate phone number format
+
         if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
             return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +94XXXXXXXXX");
         }
 
-        // Make API request to get pairing code
-        const response = await axios.get(`https://bilalmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
-        
-        if (!response.data || !response.data.code) {
-            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
+        // Fetch HTML page from Heroku site
+        const res = await axios.get(`https://bilalmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
+        const html = res.data;
+
+        // Extract code (search for CODE: XXXXXXX)
+        const match = html.match(/CODE:\s*([A-Z0-9]+)/i);
+        if (!match) {
+            return await reply("❌ Could not extract pairing code. Try again later.");
         }
 
-        const pairingCode = response.data.code;
+        const pairingCode = match[1];
         const doneMessage = "> *BILAL-MD PAIRING COMPLETED*";
 
-        // Send initial message with formatting
         await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
 
-        // Add 2 second delay
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Send clean code message
         await reply(`${pairingCode}`);
 
-    } catch (error) {
-        console.error("Pair command error:", error);
-        await reply("❌ An error occurred while getting pairing code. Please try again later.");
+    } catch (err) {
+        console.error("Pair1 command error:", err);
+        await reply("❌ Error while getting BILAL-MD pairing code.");
+    }
+});
+
+// ===============================
+// Pair 2 (WHITESHADOW-MD)
+// ===============================
+cmd({
+    pattern: "pair2",
+    alias: ["getpair2", "clonebot2"],
+    react: "✅",
+    desc: "Get pairing code for biLAL-MD bot",
+    category: "download",
+    use: ".pair2 +947XXXXXXXX",
+    filename: __filename
+}, async (conn, mek, m, { q, senderNumber, reply }) => {
+    try {
+        const phoneNumber = q ? q.trim() : senderNumber;
+
+        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
+            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair2 +94XXXXXXXXX");
+        }
+
+        // Fetch HTML page from Heroku site
+        const res = await axios.get(`https://ilmd-pair-602d1996abb2.herokuapp.com/pair?phone=${encodeURIComponent(phoneNumber)}`);
+        const html = res.data;
+
+        // Extract code (search for CODE: XXXXXXX)
+        const match = html.match(/CODE:\s*([A-Z0-9]+)/i);
+        if (!match) {
+            return await reply("❌ Could not extract pairing code. Try again later.");
+        }
+
+        const pairingCode = match[1];
+        const doneMessage = "> *BiLAL-MD PAIRING COMPLETED*";
+
+        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        await reply(`${pairingCode}`);
+
+    } catch (err) {
+        console.error("Pair2 command error:", err);
+        await reply("❌ Error while getting BiLAL-MD pairing code.");
     }
 });
