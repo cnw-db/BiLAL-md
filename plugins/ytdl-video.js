@@ -1,135 +1,62 @@
-// ytmp4.js
-// ESM plugin for a Baileys-style WhatsApp bot (WHITESHADOW-MD style).
-// Command name: ytmp4
-// Usage: .ytmp4 <youtube-url>
-// Dependencies: axios
-import axios from 'axios';
-import { fileTypeFromBuffer } from 'file-type'; // optional but helpful
+Bilal-MD style plugin: ytmp4x.js
+// Drop this file into your Bilal-MD plugins folder and restart the bot.
 
-export default {
+const axios = require('axios');
+
+module.exports = {
   name: 'video',
-  alias: ['ytmp4', 'ytmp'],
-  desc: 'Download YouTube mp4 via Kaizenji API — first send details, then send video',
-  async exec(m, { conn, args, usedPrefix, command }) {
+  alias: ['ytmp4','ytshort','ytshorts'],
+  desc: 'Download YouTube MP4 using PrinceTech API (Bilal-MD style).',
+  category: 'download',
+  isOwner: false,
+
+  async handle(conn, msg, { args, quoted, reply }) {
     try {
-      const url = (args && args[0]) ? args[0] : null;
-      if (!url) {
-        return conn.sendMessage(m.chat, { text: `Usage: ${usedPrefix}${command} <youtube_url>` }, { quoted: m });
+      const extractUrl = (text = '') => {
+        if (!text) return null;
+        const urlRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[\w\-?=&%.#\/]+)|(youtube\.com\/[\w\-?=&%.#\/]+)/i;
+        const match = text.match(urlRegex);
+        if (!match) return null;
+        return match[0].startsWith('http') ? match[0] : `https://${match[0]}`;
+      };
+
+      const provided = args?.length ? args.join(' ') : (quoted && (quoted.text || quoted.caption)) || '';
+      const ytUrl = extractUrl(provided);
+
+      if (!ytUrl) return await reply('🧩 Usage: ytmp4x <youtube-url>\nOr reply to a message containing a YouTube link.');
+
+      const api = `https://api.princetechn.com/api/download/ytmp4?apikey=prince&url=${encodeURIComponent(ytUrl)}`;
+      await reply('⏳ Fetching video info from PrinceTech...');
+
+      const { data } = await axios.get(api, { timeout: 30000, headers: { 'User-Agent': 'Bilal-MD/1.0' } });
+
+      if (!data || data.success !== true || !data.result?.download_url) {
+        return await reply('❌ Unable to fetch video info. Try another link or later.');
       }
 
-      // Build API URL (example encoded form). Replace apikey if you want dynamic.
-      const apiKey = '8e3b0d39-d9d4-47a1-a125-0801eb103e7f';
-      const api = `https://kaiz-apis.gleeze.com/api/ytmp4?url=${encodeURIComponent(url)}&quality=360&apikey=${apiKey}`;
+      const { title, thumbnail, download_url, quality } = data.result;
+      const cleanTitle = title ? title.replace(/[\\/:*?"<>|]/g, '') : 'video';
 
-      // Inform user we're fetching details
-      await conn.sendMessage(m.chat, { text: '🔎 Getting video details...' }, { quoted: m });
+      // send details card first
+      await conn.sendMessage(msg.from, {
+        image: { url: thumbnail },
+        caption: `*🎬 Title:* ${title}\n📺 *Quality:* ${quality || '—'}\n🔗 *Download:* ${download_url}`,
+      }, { quoted: msg });
 
-      const res = await axios.get(api, { timeout: 20000 });
-      if (!res || !res.data) throw new Error('Empty response from API');
-
-      const data = res.data;
-      // expected keys: author, title, thumbnail, download_url, quality
-      const { author, title, thumbnail, download_url: downloadUrl, quality } = data;
-
-      if (!title || !downloadUrl) {
-        return conn.sendMessage(m.chat, { text: '❌ API returned incomplete data.' }, { quoted: m });
-      }
-
-      // Prepare details caption
-      const caption =
-`🎬 Title: ${title}
-👤 Author: ${author || 'Unknown'}
-📺 Quality: ${quality || 'Unknown'}
-🔗 Source: ${url}
-
-▶️ Sending video now...`;
-
-      // First send thumbnail + details message (image with caption)
+      // then send video file
       try {
-        if (thumbnail) {
-          // send thumbnail as image with caption
-          await conn.sendMessage(m.chat, {
-            image: { url: thumbnail },
-            caption
-          }, { quoted: m });
-        } else {
-          await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
-        }
-      } catch (errThumb) {
-        // If thumbnail send fails, still send text details
-        await conn.sendMessage(m.chat, { text: caption }, { quoted: m });
+        await conn.sendMessage(msg.from, {
+          video: { url: download_url },
+          fileName: `${cleanTitle}.mp4`,
+          mimetype: 'video/mp4',
+          caption: `✅ ${title}\n📥 Source: PrinceTech API`
+        }, { quoted: msg });
+      } catch (err) {
+        await reply(`⚠️ Can't upload video (size or bot limit).\nDirect download: ${download_url}`);
       }
-
-      // Now download the video (arraybuffer) - careful with big files
-      await conn.sendMessage(m.chat, { text: '⬇️ Downloading video... (may take a moment)' }, { quoted: m });
-
-      const dlResp = await axios.get(downloadUrl, {
-        responseType: 'arraybuffer',
-        timeout: 120000,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
-      });
-
-      const buffer = Buffer.from(dlResp.data);
-
-      // Check file type (optional)
-      let mime = 'video/mp4';
-      try {
-        const ft = await fileTypeFromBuffer(buffer);
-        if (ft && ft.mime) mime = ft.mime;
-      } catch (e) {
-        // ignore
-      }
-
-      // If file is very large (> 100 MB) better to send as document or send the direct link
-      const MAX_SEND_BYTES = 100 * 1024 * 1024; // 100 MB threshold (adjust as needed)
-      if (buffer.length > MAX_SEND_BYTES) {
-        // send as document with caption OR fallback to send link only
-        try {
-          await conn.sendMessage(m.chat, {
-            document: buffer,
-            fileName: `${title.replace(/[/\\?%*:|"<>]/g, '').slice(0, 60)}.mp4`,
-            mimetype: mime,
-            caption: `📦 File is large (${(buffer.length / (1024*1024)).toFixed(2)} MB). Sending as document.`
-          }, { quoted: m });
-        } catch (errDoc) {
-          // if even that fails, provide the download link for manual download
-          await conn.sendMessage(m.chat, {
-            text: `⚠️ Video is too large to send. Download it directly: ${downloadUrl}`
-          }, { quoted: m });
-        }
-      } else {
-        // send as video (native playback)
-        try {
-          await conn.sendMessage(m.chat, {
-            video: buffer,
-            caption: `▶️ ${title}\nUploaded by: ${author || 'Unknown'}`,
-            mimetype: mime,
-            fileName: `${title.replace(/[/\\?%*:|"<>]/g, '').slice(0, 60)}.mp4`,
-            // you can set gifPlayback: true if you want animated preview for short clips
-          }, { quoted: m });
-        } catch (errVideo) {
-          // fallback: send as document
-          try {
-            await conn.sendMessage(m.chat, {
-              document: buffer,
-              fileName: `${title.replace(/[/\\?%*:|"<>]/g, '').slice(0, 60)}.mp4`,
-              mimetype: mime,
-              caption: `⚠️ Couldn't send as native video. Sending as file.`
-            }, { quoted: m });
-          } catch (errDoc2) {
-            // final fallback: send link
-            await conn.sendMessage(m.chat, {
-              text: `⚠️ Couldn't send file. Download link: ${downloadUrl}`
-            }, { quoted: m });
-          }
-        }
-      }
-
-    } catch (err) {
-      console.error(err);
-      const emsg = (err && err.response && err.response.data) ? JSON.stringify(err.response.data).slice(0, 1000) : (err.message || String(err));
-      await conn.sendMessage(m.chat, { text: `❌ Error: ${emsg}` }, { quoted: m });
+    } catch (error) {
+      console.error('ytmp4x (bilal) error =>', error?.message || error);
+      await reply('🚫 Unexpected error. Please try again later.');
     }
   }
 };
