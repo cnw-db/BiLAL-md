@@ -5,7 +5,7 @@ const { ytsearch } = require('@dark-yasiya/yt-dl.js');
 // MP4 video download
 
 cmd({
-    pattern: "video",
+    pattern: "videox",
     alias: ["videox"],
     desc: "To download videos.",
     react: "🎥",
