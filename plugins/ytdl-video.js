@@ -1,61 +1,62 @@
-
-
+const { cmd } = require('../command');
 const axios = require('axios');
 
-module.exports = {
-  name: 'video',
-  alias: ['ytmp4','ytshort','ytshorts'],
-  desc: 'Download YouTube MP4 using PrinceTech API (Bilal-MD style).',
+function extractUrl(text = '') {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[\w\-?=&%.#\/]+)|(youtube\.com\/[\w\-?=&%.#\/]+)/i;
+  const match = text.match(urlRegex);
+  if (!match) return null;
+  return match[0].startsWith('http') ? match[0] : `https://${match[0]}`;
+}
+
+cmd({
+  pattern: 'video',
+  alias: ['mp40','ytmp4'],
+  desc: 'Download YouTube video (MP4) using PrinceTech API.',
   category: 'download',
-  isOwner: false,
+  react: '📥',
+  filename: __filename
+},
+async (conn, mek, m, { from, args, reply, quoted }) => {
+  try {
+    const provided = args.join(' ').trim() || (quoted && (quoted.text || quoted.caption)) || '';
+    const ytUrl = extractUrl(provided);
 
-  async handle(conn, msg, { args, quoted, reply }) {
-    try {
-      const extractUrl = (text = '') => {
-        if (!text) return null;
-        const urlRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[\w\-?=&%.#\/]+)|(youtube\.com\/[\w\-?=&%.#\/]+)/i;
-        const match = text.match(urlRegex);
-        if (!match) return null;
-        return match[0].startsWith('http') ? match[0] : `https://${match[0]}`;
-      };
-
-      const provided = args?.length ? args.join(' ') : (quoted && (quoted.text || quoted.caption)) || '';
-      const ytUrl = extractUrl(provided);
-
-      if (!ytUrl) return await reply('🧩 Usage: ytmp4x <youtube-url>\nOr reply to a message containing a YouTube link.');
-
-      const api = `https://api.princetechn.com/api/download/ytmp4?apikey=prince&url=${encodeURIComponent(ytUrl)}`;
-      await reply('⏳ Fetching video info from PrinceTech...');
-
-      const { data } = await axios.get(api, { timeout: 30000, headers: { 'User-Agent': 'Bilal-MD/1.0' } });
-
-      if (!data || data.success !== true || !data.result?.download_url) {
-        return await reply('❌ Unable to fetch video info. Try another link or later.');
-      }
-
-      const { title, thumbnail, download_url, quality } = data.result;
-      const cleanTitle = title ? title.replace(/[\\/:*?"<>|]/g, '') : 'video';
-
-      // send details card first
-      await conn.sendMessage(msg.from, {
-        image: { url: thumbnail },
-        caption: `*🎬 Title:* ${title}\n📺 *Quality:* ${quality || '—'}\n🔗 *Download:* ${download_url}`,
-      }, { quoted: msg });
-
-      // then send video file
-      try {
-        await conn.sendMessage(msg.from, {
-          video: { url: download_url },
-          fileName: `${cleanTitle}.mp4`,
-          mimetype: 'video/mp4',
-          caption: `✅ ${title}\n📥 Source: PrinceTech API`
-        }, { quoted: msg });
-      } catch (err) {
-        await reply(`⚠️ Can't upload video (size or bot limit).\nDirect download: ${download_url}`);
-      }
-    } catch (error) {
-      console.error('ytmp4x (bilal) error =>', error?.message || error);
-      await reply('🚫 Unexpected error. Please try again later.');
+    if (!ytUrl) {
+      return reply('🧩 *Usage:* .ytmp4 <youtube-url>\n👉 Or reply to a message containing a YouTube link.');
     }
+
+    const api = `https://api.princetechn.com/api/download/ytmp4?apikey=prince&url=${encodeURIComponent(ytUrl)}`;
+    await reply('⏳ Fetching video info...');
+
+    const { data } = await axios.get(api, { timeout: 30_000, headers: { 'User-Agent': 'WhiteShadow-MD/1.0' } });
+
+    if (!data || data.success !== true || !data.result?.download_url) {
+      return reply('❌ Failed to fetch. Try another link or later.');
+    }
+
+    const { title, thumbnail, download_url, quality } = data.result;
+    const caption = `*🎬 ${title}*\n🧩 Quality: *${quality || '—'}*\n\n➡️ *Auto-sending video...*`;
+
+    // Normal image preview only
+    await conn.sendMessage(from, {
+      image: { url: thumbnail },
+      caption
+    }, { quoted: m });
+
+    // Send video
+    try {
+      await conn.sendMessage(from, {
+        video: { url: download_url },
+        fileName: `${title.replace(/[\\/:*?"<>|]/g, '')}.mp4`,
+        mimetype: 'video/mp4',
+        caption: `✅ Downloaded: *${title}*\n📥 POWERED BY BILAL-MD`
+      }, { quoted: m });
+    } catch (err) {
+      await reply(`⚠️ I couldn't upload the file due to size/limits.\n\n*Direct Download:* ${download_url}`);
+    }
+  } catch (e) {
+    console.error('ytmp4x error =>', e?.message || e);
+    reply('🚫 An unexpected error occurred. Please try again.');
   }
-};
+});
