@@ -1,62 +1,124 @@
-const { cmd } = require('../command');
-const axios = require('axios');
-
-function extractUrl(text = '') {
-  if (!text) return null;
-  const urlRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[\w\-?=&%.#\/]+)|(youtube\.com\/[\w\-?=&%.#\/]+)/i;
-  const match = text.match(urlRegex);
-  if (!match) return null;
-  return match[0].startsWith('http') ? match[0] : `https://${match[0]}`;
-}
+const { cmd } = require("../command");
+const axios = require("axios");
+const ytSearch = require("yt-search");
 
 cmd({
-  pattern: 'video',
-  alias: ['mp40','ytmp4'],
-  desc: 'Download YouTube video (MP4) using PrinceTech API.',
-  category: 'download',
-  react: '📥',
+  pattern: "video",
+  alias: ["ytmp4", "v"],
+  desc: "Download YouTube videos by name or keyword",
+  category: "media",
+  react: "🎬",
   filename: __filename
-},
-async (conn, mek, m, { from, args, reply, quoted }) => {
+}, async (conn, mek, m, { from, q }) => {
+  if (!q) {
+    return conn.sendMessage(from, { text: "❌ Please enter a YouTube video keyword or name!" }, { quoted: mek });
+  }
+
   try {
-    const provided = args.join(' ').trim() || (quoted && (quoted.text || quoted.caption)) || '';
-    const ytUrl = extractUrl(provided);
+    // 🔍 Searching reaction
+    await conn.sendMessage(from, { react: { text: "🔎", key: mek.key } });
 
-    if (!ytUrl) {
-      return reply('🧩 *Usage:* .ytmp4 <youtube-url>\n👉 Or reply to a message containing a YouTube link.');
-    }
+    // 🔎 Search YouTube
+    const searchResult = await ytSearch(q);
+    const video = searchResult.videos?.[0];
+    if (!video) throw new Error("No video found");
 
-    const api = `https://api.princetechn.com/api/download/ytmp4?apikey=prince&url=${encodeURIComponent(ytUrl)}`;
-    await reply('⏳ Fetching video info...');
+    // 🎯 Fetch download info
+    const downloadInfo = await fetchVideoDownload(video);
 
-    const { data } = await axios.get(api, { timeout: 30_000, headers: { 'User-Agent': 'WhiteShadow-MD/1.0' } });
+    // 🌟 Send modern preview
+    await sendStyledPreview(conn, from, mek, video, downloadInfo);
 
-    if (!data || data.success !== true || !data.result?.download_url) {
-      return reply('❌ Failed to fetch. Try another link or later.');
-    }
+    // 🎬 Send actual video
+    await sendStyledVideo(conn, from, mek, video, downloadInfo);
 
-    const { title, thumbnail, download_url, quality } = data.result;
-    const caption = `*🎬 ${title}*\n🧩 Quality: *${quality || '—'}*\n\n➡️ *Auto-sending video...*`;
+    // ✅ Success reaction
+    await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
 
-    // Normal image preview only
-    await conn.sendMessage(from, {
-      image: { url: thumbnail },
-      caption
-    }, { quoted: m });
-
-    // Send video
-    try {
-      await conn.sendMessage(from, {
-        video: { url: download_url },
-        fileName: `${title.replace(/[\\/:*?"<>|]/g, '')}.mp4`,
-        mimetype: 'video/mp4',
-        caption: `✅ Downloaded: *${title}*\n📥 POWERED BY BILAL-MD`
-      }, { quoted: m });
-    } catch (err) {
-      await reply(`⚠️ I couldn't upload the file due to size/limits.\n\n*Direct Download:* ${download_url}`);
-    }
-  } catch (e) {
-    console.error('ytmp4x error =>', e?.message || e);
-    reply('🚫 An unexpected error occurred. Please try again.');
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(from, { text: "❌ Something went wrong! Please try again later." }, { quoted: mek });
+    await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
   }
 });
+
+// -------------------
+// Helper: Fetch Video
+// -------------------
+async function fetchVideoDownload(video) {
+  const apis = [
+    `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(video.url)}`,
+    `https://iamtkm.vercel.app/downloaders/ytmp4?url=${encodeURIComponent(video.url)}`
+  ];
+
+  for (let i = 0; i < apis.length; i++) {
+    try {
+      const res = await axios.get(apis[i]);
+      const data = i === 0 ? res.data.result : res.data?.data;
+      const url = data?.download_url || data?.url;
+      if (!url) throw new Error("No download URL found");
+
+      return {
+        title: data.title || video.title,
+        thumbnail: data.thumbnail || video.thumbnail,
+        download_url: url,
+        quality: data.quality || (i === 0 ? "HD" : "Standard"),
+      };
+    } catch (e) {
+      if (i === apis.length - 1) throw new Error("All APIs failed");
+    }
+  }
+}
+
+// -------------------
+// Helper: Styled Preview
+// -------------------
+async function sendStyledPreview(conn, from, mek, video, info) {
+  const caption = `🎬 *Video Preview* 🎬\n\n` +
+                  `📌 *Title:* ${info.title}\n` +
+                  `⏱️ *Duration:* ${video.timestamp}\n` +
+                  `👁️ *Views:* ${video.views.toLocaleString()}\n` +
+                  `📺 *Quality:* ${info.quality}\n` +
+                  `📅 *Published:* ${video.ago}\n\n` +
+                  `💡 Click the video below to stream or download!`;
+
+  await conn.sendMessage(from, {
+    image: { url: info.thumbnail },
+    caption,
+    contextInfo: {
+      externalAdReply: {
+        title: "BILAL MD Bot | Video Stream",
+        body: "Seamless YouTube Video Streaming",
+        thumbnailUrl: info.thumbnail,
+        sourceUrl: video.url,
+        mediaType: 1,
+        renderLargerThumbnail: true,
+      },
+    },
+  }, { quoted: mek });
+}
+
+// -------------------
+// Helper: Styled Video
+// -------------------
+async function sendStyledVideo(conn, from, mek, video, info) {
+  const caption = `🎥 *Streaming Now* 🎥\n\n` +
+                  `💻 Powered by BILAL MD Bot\n` +
+                  `↻ Click play to watch or save locally!`;
+
+  await conn.sendMessage(from, {
+    video: { url: info.download_url },
+    mimetype: "video/mp4",
+    caption,
+    contextInfo: {
+      externalAdReply: {
+        title: "BILAL XMD Bot | Stream & Download",
+        body: "Watch instantly or save for later",
+        thumbnailUrl: info.thumbnail,
+        sourceUrl: video.url,
+        mediaType: 1,
+        renderLargerThumbnail: true,
+      },
+    },
+  }, { quoted: mek });
+}
