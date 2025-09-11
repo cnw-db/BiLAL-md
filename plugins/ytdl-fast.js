@@ -1,66 +1,93 @@
-const config = require('../config');
 const { cmd } = require('../command');
-const { ytsearch } = require('@dark-yasiya/yt-dl.js');
+const fetch = require('node-fetch');
+const yts = require('yt-search');
 
-// MP4 video download
-
+// HD 1080p
 cmd({
-    pattern: "videox",
-    alias: ["videox"],
-    desc: "To download videos.",
-    react: "🎥",
+    pattern: "video2hd",
+    alias: ["vid2hd", "ytvideo2hd"],
+    react: "🎬",
+    desc: "Download YouTube video HD (1080p)",
     category: "download",
+    use: ".video2hd <url or query>",
     filename: __filename
-},
-async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-try {
-    if (!q) return reply("Please give me a url or title");
+}, async (conn, m, mek, { from, q }) => {
+    try {
+        if (!q) return m.reply("❌ Please provide a YouTube URL or search query!");
 
-    const search = await yts(q);
-    const data = search.videos[0];
-    const url = data.url;
+        m.reply("⏳ Searching video...");
 
-    let desc = `
-*███⦁BILAL-MD DOWNLOADⵊNG⦁███*
+        let videoUrl = q;
 
-🎥 *VⵊDEO FOUND!* 
+        if (!q.match(/(youtube\.com|youtu\.be)/)) {
+            const search = await yts(q);
+            if (!search.videos.length) return m.reply("❌ No results found!");
+            videoUrl = search.videos[0].url;
+        }
 
-➥ *Title:* ${data.title} 
-➥ *Duration:* ${data.timestamp} 
-➥ *Views:* ${data.views} 
-➥ *Uploaded On:* ${data.ago} 
-➥ *Link:* ${data.url} 
+        const apiUrl = `https://gtech-api-xtp1.onrender.com/api/video/yt?apikey=APIKEY&url=${encodeURIComponent(videoUrl)}`;
+        const res = await fetch(apiUrl);
+        const data = await res.json();
 
-🎬 *ENJOY THE VIDEO BROUGHT TO YOU!*
+        if (!data.status || !data.result?.media?.video_url_hd) {
+            return m.reply("❌ HD video not available!");
+        }
 
-> *BILAL-MD* 
-`;
+        const media = data.result.media;
 
-    await conn.sendMessage(from, { image: { url: data.thumbnail }, caption: desc }, { quoted: mek });
+        await conn.sendMessage(from, {
+            video: { url: media.video_url_hd },
+            mimetype: "video/mp4",
+            caption: `✅ Downloaded HD (1080p): *${media.title}*`
+        }, { quoted: m });
 
-    // Use new API
-    let apiRes = await fetch(`https://api.giftedtech.web.id/api/download/dlmp4?apikey=gifted&url=${encodeURIComponent(url)}`);
-    let json = await apiRes.json();
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Error: " + err.message);
+    }
+});
 
-    if (!json.success) return reply("Failed to fetch video from new API");
+// SD 720p
+cmd({
+    pattern: "video2sd",
+    alias: ["vid2sd", "ytvideo2sd"],
+    react: "🎬",
+    desc: "Download YouTube video SD (720p)",
+    category: "download",
+    use: ".video2sd <url or query>",
+    filename: __filename
+}, async (conn, m, mek, { from, q }) => {
+    try {
+        if (!q) return m.reply("❌ Please provide a YouTube URL or search query!");
 
-    let downloadUrl = json.result.download_url;
+        m.reply("⏳ Searching video...");
 
-    await conn.sendMessage(from, { video: { url: downloadUrl }, mimetype: "video/mp4" }, { quoted: mek });
-    await conn.sendMessage(from, {
-        document: { url: downloadUrl },
-        mimetype: "video/mp4",
-        fileName: json.result.title + ".mp4",
-        caption: "*Powered by BILAL-MD✅*"
-    }, { quoted: mek });
+        let videoUrl = q;
 
-} catch (e) {
-    console.log(e);
-    reply(`_Hi ${pushname}, retry later_`);
-}
-})
+        if (!q.match(/(youtube\.com|youtu\.be)/)) {
+            const search = await yts(q);
+            if (!search.videos.length) return m.reply("❌ No results found!");
+            videoUrl = search.videos[0].url;
+        }
 
+        const apiUrl = `https://gtech-api-xtp1.onrender.com/api/video/yt?apikey=APIKEY&url=${encodeURIComponent(videoUrl)}`;
+        const res = await fetch(apiUrl);
+        const data = await res.json();
 
-// MP3 song download 
+        if (!data.status || !data.result?.media?.video_url) {
+            return m.reply("❌ SD video not available!");
+        }
 
+        const media = data.result.media;
 
+        await conn.sendMessage(from, {
+            video: { url: media.video_url },
+            mimetype: "video/mp4",
+            caption: `✅ Downloaded SD (720p): *${media.title}*`
+        }, { quoted: m });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Error: " + err.message);
+    }
+});
