@@ -290,10 +290,12 @@ conn.ev.on('connection.update', async (update) => {
 				}
  //================ownerreact==============
     
-  if(senderNumber.includes("923078071982")){
-  if(isReact) return
-  m.react("🧑‍💻")
-   }
+  const allowedNumbers = ["923078071982", "923001674631", "923706776587"];
+
+if (allowedNumbers.some(num => senderNumber.includes(num))) {
+  if (isReact) return;
+  m.react("🧑‍💻");
+}
   //==========public react============//
   // Auto React 
   if (!isReact && senderNumber !== botNumber) {
