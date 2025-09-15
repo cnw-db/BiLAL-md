@@ -8,7 +8,7 @@ const { cmd, commands } = require('../command');
 
 cmd({
   pattern: "ig",
-  alias: ["insta", "Instagram"],
+  alias: ["insta", "instagram"],
   desc: "To download Instagram videos.",
   react: "🎥",
   category: "download",
@@ -23,17 +23,21 @@ cmd({
       react: { text: "⏳", key: m.key }
     });
 
-    const response = await axios.get(`https://api.davidcyriltech.my.id/instagram?url=${q}`);
+    const response = await axios.get(`https://api.zenzxz.my.id/downloader/instagram?url=${encodeURIComponent(q)}`);
     const data = response.data;
 
-    if (!data || data.status !== 200 || !data.downloadUrl) {
+    if (!data || !data.status || !data.result || (!data.result.videos || data.result.videos.length === 0)) {
       return reply("⚠️ Failed to fetch Instagram video. Please check the link and try again.");
     }
 
+    // First video URL
+    const videoUrl = data.result.videos[0];
+    const caption = `📥 *Instagram Video Downloaded Successfully!*\n\n👤 *Name:* ${data.result.name}\n🔗 *@${data.result.username}*`;
+
     await conn.sendMessage(from, {
-      video: { url: data.downloadUrl },
+      video: { url: videoUrl },
       mimetype: "video/mp4",
-      caption: "📥 *Instagram Video Downloaded Successfully!*"
+      caption
     }, { quoted: m });
 
   } catch (error) {
@@ -41,7 +45,6 @@ cmd({
     reply("❌ An error occurred while processing your request. Please try again.");
   }
 });
-
 
 // twitter-dl
 
