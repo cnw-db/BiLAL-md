@@ -3,44 +3,48 @@ const { cmd } = require('../command');
 cmd({
     pattern: "add",
     alias: ["a", "invite"],
-    desc: "Adds a member to the group",
+    desc: "Add a member to the group",
     category: "admin",
     react: "➕",
     filename: __filename
 },
 async (conn, mek, m, {
-    from, q, isGroup, isBotAdmins, reply, quoted, senderNumber
+    from, q, isGroup, isBotAdmins, isAdmins, reply
 }) => {
-    // Check if the command is used in a group
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
-
-    // Get the bot owner's number dynamically from conn.user.id
-    const botOwner = conn.user.id.split(":")[0];
-    if (senderNumber !== botOwner) {
-        return reply("❌ Only the bot owner can use this command.");
-    }
-
-    // Check if the bot is an admin
-    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
-
-    let number;
-    if (m.quoted) {
-        number = m.quoted.sender.split("@")[0]; // If replying to a message, get the sender's number
-    } else if (q && q.includes("@")) {
-        number = q.replace(/[@\s]/g, ''); // If manually typing a number with '@'
-    } else if (q && /^\d+$/.test(q)) {
-        number = q; // If directly typing a number
-    } else {
-        return reply("❌ Please reply to a message, mention a user, or provide a number to add.");
-    }
-
-    const jid = number + "@s.whatsapp.net";
-
     try {
+        // Group check
+        if (!isGroup) return reply("❌ This command can only be used in groups.");
+
+        // Admin check
+        if (!isAdmins) return reply("⚠️ Only group admins can use this command!");
+        if (!isBotAdmins) return reply("⚠️ I need to be an admin to add members!");
+
+        let number;
+        if (m.quoted) {
+            number = m.quoted.sender.split("@")[0]; // From replied message
+        } else if (q && q.includes("@")) {
+            number = q.replace(/[^0-9]/g, ""); // From @mention
+        } else if (q && /^\d+$/.test(q)) {
+            number = q; // From plain number
+        } else {
+            return reply("⚠️ Please reply to a user, mention a number, or type a number to add.");
+        }
+
+        const jid = number + "@s.whatsapp.net";
+
+        // Prevent bot adding itself
+        if (jid === conn.user.id) return reply("⚠️ I cannot add myself!");
+
+        // Try to add
         await conn.groupParticipantsUpdate(from, [jid], "add");
-        reply(`✅ Successfully added @${number}`, { mentions: [jid] });
+
+        return conn.sendMessage(from, {
+            text: `✅ Successfully added @${number}`,
+            mentions: [jid]
+        }, { quoted: mek });
+
     } catch (error) {
         console.error("Add command error:", error);
-        reply("❌ Failed to add the member.");
+        reply("❌ Failed to add the member. They might have left recently, blocked group invites, or number is invalid.");
     }
 });
