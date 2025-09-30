@@ -1,80 +1,43 @@
-const axios = require("axios");
-const { cmd } = require("../command");
+const { cmd } = require('../command')
+const axios = require('axios')
+const cheerio = require('cheerio')
+const qs = require('qs')
 
 cmd({
-  pattern: "fb",
-  alias: ["facebook", "fbdl"],
-  desc: "Download Facebook videos",
-  category: "download",
-  filename: __filename,
-  use: "<Facebook URL>",
-}, async (conn, m, store, { from, q, reply }) => {
+  pattern: 'fbdl',
+  alias: ['fb', 'facebookdl'],
+  desc: 'Download Facebook videos',
+  category: 'downloader',
+  filename: __filename
+}, async (conn, m, { args }) => {
+  if (!args[0]) return m.reply('📌 Use: .fbdl <facebook_url>')
+
+  m.reply('⬇️ Downloading...')
+
   try {
-    if (!q || !q.startsWith("http")) {
-      return reply("*`Need a valid Facebook URL`*\n\nExample: `.fb https://www.facebook.com/...`");
-    }
+    const url = args[0]
+    const payload = qs.stringify({ fb_url: url })
 
-    // Loading react
-    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+    const res = await axios.post('https://saveas.co/smart_download.php', payload, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0'
+      }
+    })
 
-    // API Call
-    const apiUrl = `https://supun-md-api-xmjh.vercel.app/api/download/fbdown?url=${encodeURIComponent(q)}`;
-    const { data } = await axios.get(apiUrl);
+    const $ = cheerio.load(res.data)
+    const hd = $('#hdLink').attr('href') || null
+    const sd = $('#sdLink').attr('href') || null
+    const video = hd || sd
 
-    if (!data.success || !data.results) {
-      return reply("❌ Failed to fetch the video. Try another link.");
-    }
+    if (!video) return m.reply('❌ Failed to fetch video link.')
 
-    const { title, description, hdLink, sdLink } = data.results;
-
-    if (!hdLink && !sdLink) return reply("❌ No downloadable link found.");
-
-    // Show choices
-    let menu = `📥 *Facebook Video Downloader*\n\n`;
-    menu += `*🎬 Title:* ${title}\n`;
-    menu += `*📝 Description:* ${description}\n\n`;
-    menu += `🔽 Choose Quality by Replying Number:\n\n`;
-    if (sdLink) menu += `1️⃣ SD Quality\n`;
-    if (hdLink) menu += `2️⃣ HD Quality\n\n`;
-    menu += `⚡ Reply with *1* or *2*`;
-
-    await conn.sendMessage(from, { text: menu }, { quoted: m });
-
-    // Create temporary store for reply
-    conn.FB_DOWNLOAD = conn.FB_DOWNLOAD || {};
-    conn.FB_DOWNLOAD[m.sender] = { sdLink, hdLink };
+    await conn.sendMessage(m.chat, {
+      video: { url: video },
+      caption: `✅ *Facebook Video Downloader*\nQuality: ${hd ? 'HD' : 'SD'}`
+    }, { quoted: m })
 
   } catch (e) {
-    console.error("FB Error:", e);
-    reply("❌ Error fetching the video. Please try again.");
+    m.reply(`❌ Error: ${e.message}`)
   }
-});
-
-// Reply handler
-cmd({
-  on: "message"
-}, async (conn, m) => {
-  if (!conn.FB_DOWNLOAD) return;
-  const choice = m.body?.trim();
-  const user = m.sender;
-
-  if (conn.FB_DOWNLOAD[user]) {
-    const { sdLink, hdLink } = conn.FB_DOWNLOAD[user];
-
-    if (choice === "1" && sdLink) {
-      await conn.sendMessage(m.chat, {
-        video: { url: sdLink },
-        caption: "📥 *Facebook SD Video Downloaded*\n\n- Powered By BILAL-ᎷᎠ ✅"
-      }, { quoted: m });
-      delete conn.FB_DOWNLOAD[user];
-    }
-
-    if (choice === "2" && hdLink) {
-      await conn.sendMessage(m.chat, {
-        video: { url: hdLink },
-        caption: "📥 *Facebook HD Video Downloaded*\n\n- Powered By BILAL-ᎷᎠ ✅"
-      }, { quoted: m });
-      delete conn.FB_DOWNLOAD[user];
-    }
-  }
-});
+})
