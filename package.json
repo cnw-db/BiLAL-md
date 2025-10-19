@@ -10,7 +10,7 @@
     "restart": "pm2 restart BILAL-MD"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "github:MRSHABAN45/Shaban-Baileys",
+    "@whiskeysockets/baileys": "github:Drayyyxd/XD-Baileys",
     "@adiwajshing/keyed-db": "latest",
     "@dark-yasiya/yt-dl.js": "1.0.5",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
